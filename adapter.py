@@ -24,11 +24,14 @@ INDEX_LENGTH = 15
 # as name
 IMAGE_FORMAT = 'jpg'
 # do not change
+# LABEL_PATH = KITTI_PATH + '/label_'
 LABEL_PATH = KITTI_PATH + '/label_'
 LABEL_ALL_PATH = KITTI_PATH + '/label_all'
+# IMAGE_PATH = KITTI_PATH + '/image'
 IMAGE_PATH = KITTI_PATH + '/image_'
 CALIB_PATH = KITTI_PATH + '/calib'
-LIDAR_PATH = KITTI_PATH + '/lidar'
+# LIDAR_PATH = KITTI_PATH + '/lidar'
+LIDAR_PATH = KITTI_PATH + '/velodyne'
 ###############################################################################
 
 class Adapter:
@@ -49,7 +52,8 @@ class Adapter:
                     progressbar.Bar(marker='>',left='[',right=']'),' ',
                     progressbar.ETA()])
 
-        tf.enable_eager_execution()
+        if tf.__version__[0] == '1':
+            tf.enable_eager_execution()
         file_num = 1
         frame_num = 0
         print("start converting ...")
@@ -288,14 +292,14 @@ class Adapter:
         # range_image_top_pose = None
         for laser in frame.lasers:
             if len(laser.ri_return1.range_image_compressed) > 0:
-                range_image_str_tensor = tf.decode_compressed(
+                range_image_str_tensor = tf.io.decode_compressed(
                     laser.ri_return1.range_image_compressed, 'ZLIB')
                 ri = open_dataset.MatrixFloat()
                 ri.ParseFromString(bytearray(range_image_str_tensor.numpy()))
                 self.__range_images[laser.name] = [ri]
 
                 if laser.name == open_dataset.LaserName.TOP:
-                    range_image_top_pose_str_tensor = tf.decode_compressed(
+                    range_image_top_pose_str_tensor = tf.io.decode_compressed(
                         laser.ri_return1.range_image_pose_compressed, 'ZLIB')
                     range_image_top_pose = open_dataset.MatrixFloat()
                     range_image_top_pose.ParseFromString(
@@ -307,7 +311,7 @@ class Adapter:
                 # cp.ParseFromString(bytearray(camera_projection_str_tensor.numpy()))
                 # camera_projections[laser.name] = [cp]
             if len(laser.ri_return2.range_image_compressed) > 0:
-                range_image_str_tensor = tf.decode_compressed(
+                range_image_str_tensor = tf.io.decode_compressed(
                     laser.ri_return2.range_image_compressed, 'ZLIB')
                 ri = open_dataset.MatrixFloat()
                 ri.ParseFromString(bytearray(range_image_str_tensor.numpy()))
