@@ -107,3 +107,10 @@ venv.bak/
 
 test.py
 lidar_cam_proj.py
+
+kitti_dataset/*
+
+waymo_dataset/*
+
+.vscode/*
+
